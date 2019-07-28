@@ -3,7 +3,7 @@
  */
  var hunbun = "bunny";
  
- var state, bunny;
+ var state, bunny, sheet;
 // Create our application instance
 var app = new PIXI.Application({
     width: window.innerWidth,
@@ -13,9 +13,13 @@ var app = new PIXI.Application({
 document.body.appendChild(app.view);
  
 // Load the bunny texture
-app.loader.add('bunny', 'https://pixijs.io/examples/examples/assets/bunny.png')
+PIXI.Loader.shared.add("sprites/spritesheet.json")
+    .load(spriteSetup)
     .load(startup);
  
+function spriteSetup(){
+    sheet = PIXI.Loader.shared.resources["sprites/spritesheet.json"].spritesheet;    
+}
 function startup()
 {
     var square = new PIXI.Sprite(PIXI.Texture.WHITE);
@@ -23,7 +27,7 @@ function startup()
     square.width = square.height = 30;
     square.position.set(app.renderer.width/4, app.renderer.height / 2);
 
-    bunny = new PIXI.Sprite(app.loader.resources.bunny.texture);
+    bunny = new PIXI.Sprite(sheet.textures["bunny.png"]);
  
     // Center the sprite's anchor point
     bunny.anchor.set(0.5);
