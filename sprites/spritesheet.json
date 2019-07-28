@@ -1,0 +1,41 @@
+{
+	"meta": {
+		"image": "spritesheet.png",
+		"size": {"w":4096,"h":4096},
+		"scale": "1"
+	},
+	"frames": {
+		"ground.png":
+		{
+			"frame": {"x":0,"y":0,"w":2048,"h":2048},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":2048,"h":2048},
+			"sourceSize": {"w":2048,"h":2048}
+		},
+		"hitMap.png":
+		{
+			"frame": {"x":2048,"y":0,"w":2048,"h":2048},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":2048,"h":2048},
+			"sourceSize": {"w":2048,"h":2048}
+		},
+		"tree.png":
+		{
+			"frame": {"x":0,"y":2048,"w":2048,"h":2048},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":2048,"h":2048},
+			"sourceSize": {"w":2048,"h":2048}
+		},
+		"bunny.png":
+		{
+			"frame": {"x":2048,"y":2048,"w":77,"h":103},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":77,"h":103},
+			"sourceSize": {"w":77,"h":103}
+		}
+	}
+}

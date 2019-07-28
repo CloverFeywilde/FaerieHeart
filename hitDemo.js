@@ -1,8 +1,9 @@
 /**
  * per-pixel sprite interaction
  */
-var hunbun;
-var bunny; 
+ var hunbun = "bunny";
+ 
+ var state, bunny;
 // Create our application instance
 var app = new PIXI.Application({
     width: window.innerWidth,
@@ -17,6 +18,11 @@ app.loader.add('bunny', 'https://pixijs.io/examples/examples/assets/bunny.png')
  
 function startup()
 {
+    var square = new PIXI.Sprite(PIXI.Texture.WHITE);
+    app.stage.addChild(square);
+    square.width = square.height = 30;
+    square.position.set(app.renderer.width/4, app.renderer.height / 2);
+
     bunny = new PIXI.Sprite(app.loader.resources.bunny.texture);
  
     // Center the sprite's anchor point
@@ -32,18 +38,43 @@ function startup()
  
     bunny.interactive = true;
  
-    bunny.on('mouseover', () => {
-        bunny.tint = 0xff0000;
+    bunny.on('mousemove', (event) => {
+        //var color = bunny.getColorByPoint(new PIXI.Point(0, 0));
+        var color = bunny.getColorByPoint(event.data.global);
+        console.log(color);
+
+        // IT IS NOT THE SAME AS `PIXI.utils.rgb2hex`, rgb2hex accepts range ffrom 0.0 to 1.0, this from 0 to 255!
+        square.tint = (color[0] << 16 ) | (color[1] << 8) | color[2];
     });
- 
-    bunny.on('mouseout', () => {
-        bunny.tint = 0xffffff;
+     
+    //Keybinds and ticker
+    bunny.vx = 0;
+    bunny.vy = 0;
+    bindKeys(); 
+    state = play
+
+    app.ticker.add(function(delta){
+        gameLoop(delta);  
     });
- 
 }
- 
+
+//Game Loop
+function gameLoop(delta){
+    state(delta);
+}
+
+
+function play(delta){
+    bunny.position.x += bunny.vx;
+    bunny.position.y += bunny.vy;
+
+}
+
+
+
+//Hitmap and color picker functions
 const tempPoint = new PIXI.Point();
-PIXI.Sprite.prototype.containsPoint = function(point) {
+PIXI.Sprite.prototype.getColorByPoint = function(point) {
     this.worldTransform.applyInverse(point, tempPoint);
  
     const width = this._texture.orig.width;
@@ -64,31 +95,30 @@ PIXI.Sprite.prototype.containsPoint = function(point) {
     }
  
     if (!flag) {
-        return false;
+        return [0, 0, 0, 0];
     }
  
     // bitmap check
  
     const tex = this.texture;
     const baseTex = this.texture.baseTexture;
-    if (!baseTex.hitmap) {
-        if (!genHitMap(baseTex, 127)) {
-            return true;
+    if (!baseTex.colormap) {
+        if (!genColorMap(baseTex)) {
+            return [0, 0, 0,];
         }
     }
  
-    const hitmap = baseTex.hitmap;
+    const colormap = baseTex.colormap;
+    const data = colormap.data;
     const res = baseTex.resolution;
     // this does not account for rotation yet!!!
     let dx = Math.round((tempPoint.x - x1 + tex.frame.x) * res);
     let dy = Math.round((tempPoint.y - y1 + tex.frame.y) * res);
-    let num = dx  + dy * baseTex.hitmapWidth;
-    let num32 = num / 32 | 0;
-    let numRest = num - num32 * 32;
-    return (hitmap[num32] & (1<<numRest)) > 0;
+    let num = dx  + dy * colormap.width;
+    return [data[num*4], data[num*4 + 1], data[num*4 + 2], data[num*4 + 3]];
 }
  
-function genHitMap(baseTex, threshold) {
+function genColorMap(baseTex) {
     if (!baseTex.resource) {
         //renderTexture
         return false;
@@ -114,28 +144,9 @@ function genHitMap(baseTex, threshold) {
     }
  
     const w = canvas.width, h = canvas.height;
-    const imgData = context.getImageData(0, 0, w, h);
-    const hitmap = new Uint32Array(Math.ceil(w*h / 32));
- 
-    for (let j=0;j<h;j++) {
-        for (let i=0;i<w;i++) {
-            const num = j * w + i;
-            const num32 = num / 32 | 0;
-            const numRest = num - num32*32;
- 
-            if (imgData.data[4 * num + 3] >= threshold) {
-                hitmap[num32] |= (1<<numRest);
-            }
-        }
-    }
-    baseTex.hitmap = hitmap;
-    baseTex.hitmapWidth = w;
-    hunbun = baseTex;
-    console.log('hunbun set!');
+    baseTex.colormap = context.getImageData(0, 0, w, h);
     return true;
 }
 
-var p1 = new PIXI.Point(980,482);
-bunny.prototype.containsPoint(p1);
 
-  
+
